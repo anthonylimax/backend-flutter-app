@@ -24,4 +24,9 @@ export const RoutingDataBase = (routing : Router) => {
         new Cloud().add();
         response.json("ok");
     })
+    routing.post("/user/favorites", (request: Request, response : Response)=>{
+        let data = request.body.id;
+        db.getFavorites(data, response);
+
+    })
 }
