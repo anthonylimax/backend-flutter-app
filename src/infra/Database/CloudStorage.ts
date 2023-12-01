@@ -13,5 +13,3 @@ export class Cloud{
         { public_id: "olympic_flag" },);
     }
 }
-
-

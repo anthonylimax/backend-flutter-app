@@ -8,7 +8,7 @@ import crypto from "crypto";
 export class MySqlAdapter implements IContractDb {
   static instance: MySqlAdapter = new MySqlAdapter();
 
-  constructor() {}
+  constructor() { }
 
   async verifyLogin(data: Login, response: Response): Promise<any> {
     try {
@@ -28,7 +28,35 @@ export class MySqlAdapter implements IContractDb {
           }
         }
       );
-    } catch (e) {}
+    } catch (e) { }
+  }
+  getEvents(response: Response, id_public_user: String) {
+    let globalConnection = mysql.createConnection(
+      process.env.DATABASE_URL || ""
+    );
+    let data = [];
+    console.log(id_public_user)
+    globalConnection.query("select * from Event as e", (error: any, result: any, fields: any) => {
+      let data = result;
+      globalConnection.query("select * from Favorites where user_public_id = ?", [id_public_user], (errSecond: any, resultSecond: any, fieldsSecond: any) => {
+        let index = 0;
+        data.forEach((element : any) => {
+          data[index] = {...element, isSelected : false}
+          index++;
+        });
+        index = 0;
+        result.forEach((element : any) => {
+          resultSecond.forEach((elementTwo : any)=> {
+            
+          if(elementTwo.id_event == element.forum_public_id){
+              data[index] = {...element, isSelected: true} ;
+            }
+          });
+          index++;
+        });
+        response.json(data);
+      })
+    })
   }
 
   async giveForum(response: Response): Promise<any> {
@@ -46,6 +74,22 @@ export class MySqlAdapter implements IContractDb {
     } catch (e) {
       response.send(e);
     }
+  }
+  async DeletingFavorite(response: Response, data : any){
+    let {user_public_id, id_event} = data;
+    let globalConnection = mysql.createConnection(
+      process.env.DATABASE_URL || ""
+    );
+    globalConnection.query("delete from Favorites where id_event = ? and user_public_id = ?", [id_event ,user_public_id]);
+    response.status(200).json();
+  }
+  async AddingFavorite(response: Response, data : any){
+    let {user_public_id, id_event} = data;
+    let globalConnection = mysql.createConnection(
+      process.env.DATABASE_URL || ""
+    );
+    globalConnection.query("insert into Favorites(id_event, user_public_id) values (? , ?)", [id_event ,user_public_id]);
+    response.status(200).json();
   }
 
   giveInbox() {
@@ -67,21 +111,21 @@ export class MySqlAdapter implements IContractDb {
       response.send(e);
     }
   }
-  async setImage() {}
+  async setImage() { }
   giveMessages(inbox_public_id: string) {
     throw new Error("Method not implemented.");
   }
   giveRelUserAndEvent(id_public_user: string) {
     throw new Error("Method not implemented.");
   }
-  async getFavorites(id_public_user : string, response : Response){
+  async getFavorites(id_public_user: string, response: Response) {
     let globalConnection = mysql.createConnection(
-        process.env.DATABASE_URL || ""
-      );
+      process.env.DATABASE_URL || ""
+    );
     let data = [];
-      globalConnection.query("select e.description, e.event_data, e.organizer, e.name, e.localizacao from Favorites as f join User as u on f.user_public_id = ? join Event as e on e.forum_public_id = f.id_event;", [id_public_user], (error: any, result: any, fields: any)=>{
-        console.log(result);
-        response.json(result);
-      })
+    globalConnection.query("select e.description, e.event_data, e.organizer, e.name, e.localizacao from Favorites as f join User as u on f.user_public_id = ? join Event as e on e.forum_public_id = f.id_event;", [id_public_user], (error: any, result: any, fields: any) => {
+      console.log(result);
+      response.json(result);
+    })
   }
 }

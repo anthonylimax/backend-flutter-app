@@ -24,9 +24,21 @@ export const RoutingDataBase = (routing : Router) => {
         new Cloud().add();
         response.json("ok");
     })
-    routing.post("/user/favorites", (request: Request, response : Response)=>{
+    routing.post("/user/favorites", async (request: Request, response : Response)=>{
         let data = request.body.id;
         db.getFavorites(data, response);
+    })
+    routing.post("/getting/events", async (request: Request, response : Response)=>{
+        let data = request.body.id;
+        db.getEvents(response, data);
+    })
+    routing.delete("/deleting/favorite", async (request : Request, response : Response) =>{
+        db.DeletingFavorite(response, request.body);
+    })
+    routing.post("/adding/favorite", async (request : Request, response : Response) =>{
+        db.AddingFavorite(response, request.body);
+    })
+    routing.post('/getting/forum', (request: Request, response : Response)=>{
 
     })
 }
